@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 faster-whisper = "*"
 ctranslate2 = "*"
+yt-dlp = "*"
+srt = "*"
 
 [dev-packages]
 
