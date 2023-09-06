@@ -83,11 +83,21 @@ if __name__ == '__main__':
         print('Usage: python script.py [video_url]')
         sys.exit(1)
 
-    video_url = sys.argv[1]
-    output_path = 'output'
-    original_title, video_extension, timestamp = download_video(video_url, output_path)
-    downloaded_file_path = os.path.join(output_path, f"{timestamp}.{video_extension}")
+    input_arg = sys.argv[1]  # URL or local path
+
+    # URLで始まる場合
+    if input_arg.startswith("https://"):
+        output_path = 'output'
+        original_title, video_extension, timestamp = download_video(input_arg, output_path)
+        downloaded_file_path = os.path.join(output_path, f"{timestamp}.{video_extension}")
+
+    # ローカルファイルの場合
+    else:
+        downloaded_file_path = os.path.abspath(input_arg)
+        output_path = os.path.dirname(downloaded_file_path)
+        original_title = os.path.splitext(os.path.basename(downloaded_file_path))[0]
+        video_extension = os.path.splitext(downloaded_file_path)[1][1:]
 
     transcribe_video(downloaded_file_path)
-    rename_files(downloaded_file_path, original_title, video_extension)
-    rename_files(f"{downloaded_file_path}.srt", original_title, 'srt')
+    rename_files(downloaded_file_path, original_title, video_extension, output_path)
+    rename_files(f"{downloaded_file_path}.srt", original_title, 'srt', output_path)
