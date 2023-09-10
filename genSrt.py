@@ -44,7 +44,7 @@ def result2subs(segments):
         subs.append(sub)
     return subs
 
-def transcribe_video(file_path: str):
+def transcribe_video(file_path: str, output_path: str = 'output'):
     print(file_path)
     model_size = "large-v2"
 
@@ -56,11 +56,10 @@ def transcribe_video(file_path: str):
     print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
 
     # SRTファイルを保存するディレクトリ
-    output_dir = 'output'
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
 
-    srt_file_path = os.path.join(output_dir, f"{os.path.basename(file_path)}.srt")
+    srt_file_path = os.path.join(output_path, f"{os.path.basename(file_path)}.srt")
 
     # SRTファイルを生成して保存
     with open(srt_file_path, 'w', encoding='utf-8') as f:
@@ -98,6 +97,7 @@ if __name__ == '__main__':
         original_title = os.path.splitext(os.path.basename(downloaded_file_path))[0]
         video_extension = os.path.splitext(downloaded_file_path)[1][1:]
 
-    transcribe_video(downloaded_file_path)
+    print(f"output_path: {output_path}")
+    transcribe_video(downloaded_file_path, output_path)
     rename_files(downloaded_file_path, original_title, video_extension, output_path)
     rename_files(f"{downloaded_file_path}.srt", original_title, 'srt', output_path)
