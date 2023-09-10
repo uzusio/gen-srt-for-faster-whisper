@@ -3,4 +3,6 @@ test/*
 input/*
 output/*
 
+node_modules/*
+
 !.gitkeep
