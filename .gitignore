@@ -1,4 +1,6 @@
 test/*
+dist/*
+build/*
 
 input/*
 output/*
