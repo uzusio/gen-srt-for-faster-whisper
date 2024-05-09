@@ -56,7 +56,7 @@ Faster WhisperはCUDA Toolkit 12.X 系には対応していないため、11.X �
 
 #### 使用例
 ```
-python genSrt.py [video_url]
+python python main.py [ video_url | video_path ] [(optional)translate_to_lang]
 ```
 
 ## 依存関係のインストール

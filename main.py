@@ -12,7 +12,7 @@ def setup(translate_to_lang: str = 'none'):
 
 def main():
     if len(sys.argv) < 2:
-        print('Usage: python main.py [video_url | video_path] [(option)translate_to_lang]')
+        print('Usage: python main.py [ video_url | video_path ] [(optional)translate_to_lang]')
         sys.exit(1)
 
     input_arg = sys.argv[1]  # URL or local path
