@@ -9,6 +9,10 @@ ctranslate2 = "*"
 yt-dlp = "*"
 srt = "*"
 pyinstaller = "*"
+openai = "*"
+python-dotenv = "*"
+langchain-openai = "*"
+langchain-core = "*"
 
 [dev-packages]
 

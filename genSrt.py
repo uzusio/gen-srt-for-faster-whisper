@@ -5,6 +5,7 @@ import subprocess
 import json
 from datetime import datetime
 from datetime import timedelta
+import itertools
 import srt
 from srt import Subtitle
 from faster_whisper import WhisperModel
@@ -35,7 +36,7 @@ def download_video(url: str, output_dir: str = 'output') -> (str, str, str):
 
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     video_info = json.loads(result.stdout)
-    print(video_info)
+    # print(video_info)
 
     return  video_info['title'],  video_info['ext'], timestamp
 
@@ -63,7 +64,7 @@ def result2subs(segments):
         subs.append(sub)
     return subs
 
-def transcribe_video(file_path: str, output_path: str = 'output'):
+def transcribe_video(file_path: str, output_path: str = 'output', translator = None, translate_to_lang: str = 'none'):
     """
     指定された動画ファイルをトランスクリプトし、結果をSRTファイルとして保存します。
 
@@ -86,11 +87,45 @@ def transcribe_video(file_path: str, output_path: str = 'output'):
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
-    srt_file_path = os.path.join(output_path, f"{os.path.basename(file_path)}.srt")
+    base_filename = os.path.splitext(os.path.basename(file_path))[0]
+    srt_file_path = os.path.join(output_path, f"{base_filename}_{info.language}.srt")
 
-    # SRTファイルを生成して保存
+    # segmentsイテレータを複製
+    segments1, segments2 = itertools.tee(segments, 2)
+    
+    # 識別言語の処理を行う
     with open(srt_file_path, 'w', encoding='utf-8') as f:
-        f.write(srt.compose(result2subs(segments)))
+        f.write(srt.compose(result2subs(segments1)))
+
+    if translate_to_lang != 'none':
+        # 翻訳処理を行う
+        translated_segments = translate_segments(segments2, translator)
+        
+        translated_srt_file_path = os.path.join(output_path, f"{base_filename}_{translate_to_lang}.srt")
+        # 翻訳されたセグメントをSRT形式の字幕データに変換して保存
+        with open(translated_srt_file_path, 'w', encoding='utf-8') as f:
+            f.write(srt.compose(result2subs(translated_segments)))
+        
+def translate_segments(segments, translator):
+    """
+    セグメントを翻訳します。
+
+    Args:
+    segments: Whisperモデルから取得したセグメントのリスト。
+    translator: Translatorクラスのインスタンス。
+
+    Returns:
+    list: 翻訳されたセグメントのリスト。
+    """
+    translated_segments = []
+
+    for segment in segments:
+        text = segment.text
+        translated_text = translator.translation(text)
+        translated_segment = segment._replace(text=translated_text)
+        translated_segments.append(translated_segment)
+
+    return translated_segments
 
 def rename_files(old_path: str, new_name: str, extension: str, output_dir: str = 'output'):
     """
@@ -113,29 +148,5 @@ def rename_files(old_path: str, new_name: str, extension: str, output_dir: str =
 def clean_filename(filename: str) -> str:
     return re.sub(r'[/*?:"<>|]', '', filename)    
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('Usage: python genSrt.py [video_url | video_path]')
-        sys.exit(1)
-
-    input_arg = sys.argv[1]  # URL or local path
-
-    # URLで始まる場合
-    if input_arg.startswith("https://"):
-        output_path = 'output'
-        original_title, video_extension, timestamp = download_video(input_arg, output_path)
-        downloaded_file_path = os.path.join(output_path, f"{timestamp}.{video_extension}")
-
-    # ローカルファイルの場合
-    else:
-        downloaded_file_path = os.path.abspath(input_arg)
-        output_path = os.path.dirname(downloaded_file_path)
-        original_title = os.path.splitext(os.path.basename(downloaded_file_path))[0]
-        video_extension = os.path.splitext(downloaded_file_path)[1][1:]
-
-    print(f"output_path: {output_path}")
-    transcribe_video(downloaded_file_path, output_path)
-    # rename_files(downloaded_file_path, original_title, video_extension, output_path)
-    # rename_files(f"{downloaded_file_path}.srt", original_title, 'srt', output_path)
 
 
