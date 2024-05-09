@@ -10,6 +10,16 @@ from srt import Subtitle
 from faster_whisper import WhisperModel
 
 def download_video(url: str, output_dir: str = 'output') -> (str, str, str):
+    """
+    指定されたURLから動画をダウンロードし、タイトル、拡張子、タイムスタンプを返します。
+
+    Args:
+    url (str): ダウンロードする動画のURL。
+    output_dir (str): ダウンロードした動画を保存するディレクトリ。
+
+    Returns:
+    tuple: ダウンロードされた動画のタイトル、拡張子、タイムスタンプを含むタプル。
+    """
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -30,6 +40,15 @@ def download_video(url: str, output_dir: str = 'output') -> (str, str, str):
     return  video_info['title'],  video_info['ext'], timestamp
 
 def result2subs(segments):
+    """
+    セグメントをSRT形式の字幕データに変換します。
+
+    Args:
+    segments: Whisperモデルから取得したセグメントのリスト。
+
+    Returns:
+    list: SRT形式の字幕データリスト。
+    """
     subs = []
 
     for index, segment in enumerate(segments):
@@ -45,6 +64,14 @@ def result2subs(segments):
     return subs
 
 def transcribe_video(file_path: str, output_path: str = 'output'):
+    """
+    指定された動画ファイルをトランスクリプトし、結果をSRTファイルとして保存します。
+
+    Args:
+    file_path (str): トランスクリプトする動画ファイルのパス。
+    output_path (str): SRTファイルを保存するディレクトリ。
+
+    """
     print(file_path)
     model_size = "large-v3"
 
@@ -66,6 +93,15 @@ def transcribe_video(file_path: str, output_path: str = 'output'):
         f.write(srt.compose(result2subs(segments)))
 
 def rename_files(old_path: str, new_name: str, extension: str, output_dir: str = 'output'):
+    """
+    ファイル名を新しい名前に変更します。
+
+    Args:
+    old_path (str): 元のファイルパス。
+    new_name (str): 新しいファイル名。
+    extension (str): ファイルの拡張子。
+    output_dir (str): ファイルを保存するディレクトリ。
+    """
     counter = 1
     new_file_name = clean_filename(new_name)
 
@@ -79,7 +115,7 @@ def clean_filename(filename: str) -> str:
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print('Usage: python script.py [video_url]')
+        print('Usage: python genSrt.py [video_url | video_path]')
         sys.exit(1)
 
     input_arg = sys.argv[1]  # URL or local path
@@ -99,5 +135,7 @@ if __name__ == '__main__':
 
     print(f"output_path: {output_path}")
     transcribe_video(downloaded_file_path, output_path)
-    rename_files(downloaded_file_path, original_title, video_extension, output_path)
-    rename_files(f"{downloaded_file_path}.srt", original_title, 'srt', output_path)
+    # rename_files(downloaded_file_path, original_title, video_extension, output_path)
+    # rename_files(f"{downloaded_file_path}.srt", original_title, 'srt', output_path)
+
+
