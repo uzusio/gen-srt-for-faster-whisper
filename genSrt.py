@@ -46,7 +46,7 @@ def result2subs(segments):
 
 def transcribe_video(file_path: str, output_path: str = 'output'):
     print(file_path)
-    model_size = "large-v2"
+    model_size = "large-v3"
 
     # Run on GPU with FP16
     model = WhisperModel(model_size, device="cuda", compute_type="float16")
